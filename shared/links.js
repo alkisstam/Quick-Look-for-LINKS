@@ -277,5 +277,5 @@
     return u ? u.hostname.replace(/^www\./, '') : '';
   }
 
-  root.QLLinks = { toURL, isWeb, dedupeKey, unwrap, assess, extKind, youtube, vimeo, tweet, reddit, github, hostLabel, parseTime, loginWalled };
+  root.QLLinks = { toURL, isWeb, dedupeKey, unwrap, b64urlDecode, assess, extKind, youtube, vimeo, tweet, reddit, github, hostLabel, parseTime, loginWalled };
 })(globalThis);

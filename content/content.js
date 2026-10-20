@@ -191,7 +191,24 @@
     // In-page anchors (#section) are not previews.
     const hash = href.indexOf('#');
     if (hash >= 0 && href.slice(0, hash) === location.href.split('#')[0]) return null;
-    return L.unwrap(href);
+    return googleNewsTarget(el, href) || L.unwrap(href);
+  }
+
+  /* Google News links are opaque /read/<id> redirects, and Google answers a
+     logged-out fetch of them with a captcha. Each card also has a hidden overlay
+     link to the same /read/<id> whose jslog carries the publisher's URL as
+     "5:<base64 JSON array>". */
+  function googleNewsTarget(el, href) {
+    if (location.hostname !== 'news.google.com' || !/^https:\/\/news\.google\.com\/(read|articles)\//.test(href)) return null;
+    const id = href.split('?')[0].split('/').pop();
+    for (const a of document.querySelectorAll('a[jslog^="95014"]')) {
+      if (a.href.split('?')[0].split('/').pop() !== id) continue;
+      const m = /(?:^|;)\s*5:([A-Za-z0-9+/_-]+=*)/.exec(a.getAttribute('jslog'));
+      const data = m && L.b64urlDecode(m[1]);
+      const url = data && (data.match(/"(https?:\/\/[^"]+)"/) || [])[1];
+      if (url && L.isWeb(L.toURL(url))) return url;
+    }
+    return null;
   }
 
   function closestLink(el) {

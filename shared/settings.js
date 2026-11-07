@@ -19,10 +19,6 @@
     hoverHint: true,
     closeOnOutsideClick: true,
     timeoutSec: 8,
-    // Developer test mode (see content.js). Never on for normal use.
-    testMode: false,
-    testAutoSteps: 0,
-    testDwellMs: 2500,
     // Safety & privacy
     refuseRisky: true,
     cookieSites: [],             // hostnames allowed to use your cookies in previews

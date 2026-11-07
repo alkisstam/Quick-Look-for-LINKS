@@ -853,12 +853,11 @@
       seq = el ? buildSequence(el) : null;
       startPanel(el, opts);
     }
-    show(el, L.unwrap(url), opts.text || '', {});
+    show(el, googleNewsTarget(url) || L.unwrap(url), opts.text || '', {});
   }
 
   function startPanel(el, opts) {
     clearTimeout(teardownTimer);
-    if (settings.testMode) testSteps = settings.testAutoSteps || 0;
     mountHost();
     ensureFrame();
     hideHint();
@@ -877,7 +876,6 @@
   }
 
   function show(el, url, text, extra) {
-    testLog({ ev: 'show', url, text: (text || '').slice(0, 80) });
     const id = ++openSeq;
     current = { el, url, text, id, t0: performance.now() };
     ui.title.textContent = text || L.hostLabel(url);
@@ -972,33 +970,10 @@
       ui.ready = false;
       ui.port = null;
       ui.queue = [];
-    }, settings.testMode ? 50 : 20000);
-  }
-
-  /* ---------------- Test mode (off unless a developer sets testMode) ----------------
-     Writes what the extension did into a page attribute so automated tests can read it
-     after the panel closes, and walks the arrow-key sequence on its own. */
-  let testSteps = 0;
-  function testLog(evt) {
-    if (!settings.testMode) return;
-    const de = document.documentElement;
-    let log = [];
-    try { log = JSON.parse(de.getAttribute('data-quick-look-log') || '[]'); } catch (e) { log = []; }
-    log.push(Object.assign({ t: Math.round(performance.now()) }, evt));
-    de.setAttribute('data-quick-look-log', JSON.stringify(log.slice(-80)));
-  }
-  function testAdvance() {
-    if (!settings.testMode || !panelOpen) return;
-    clearTimeout(testAdvance.t);
-    testAdvance.t = setTimeout(() => {
-      if (!panelOpen) return;
-      if (testSteps > 0) { testSteps--; step(1); } else close({ instant: true });
-    }, settings.testDwellMs || 2500);
+    }, 20000);
   }
 
   function bump(dir) {
-    testLog({ ev: 'bump', dir });
-    if (settings.testMode) { close({ instant: true }); return; }
     if (reduceMotionMQ.matches) return;
     ui.panel.animate([{ transform: 'none' }, { transform: `translateX(${dir * 10}px)` }, { transform: 'none' }], { duration: 220, easing: 'ease-out' });
   }
@@ -1016,7 +991,6 @@
   function close(opts) {
     opts = opts || {};
     if (!panelOpen || !ui) return;
-    testLog({ ev: 'close' });
     panelOpen = false;
     clearTimeout(stepTimer);
     if (hostObserver) { hostObserver.disconnect(); hostObserver = null; }
@@ -1180,8 +1154,6 @@
   function recordStat(msg) {
     if (!current || msg.id !== current.id) return;
     const ms = Math.round(performance.now() - current.t0);
-    testLog({ ev: 'shown', url: current.url, mode: msg.mode, cached: !!msg.cached, ms, title: ui.title.textContent, info: ui.badge.title, modes: modes.slice(), seq: seq ? { index: seq.index, length: seq.list.length, mode: seq.mode } : null });
-    testAdvance();
     S.getLocal().then((l) => {
       const st = l.stats || { since: Date.now(), opened: 0, modes: {}, times: [] };
       st.opened = (st.opened || 0) + 1;
@@ -1281,7 +1253,6 @@
     if (isTypingContext(e)) return;
     const link = targetLink();
     if (link) {
-      testLog({ ev: 'trigger', url: previewUrl(link), x: pointer.x, y: pointer.y, focused: deepActiveElement() === link, tag: link.localName, text: linkText(link).slice(0, 60) });
       swallow(e);
       hideHint();
       open(link, { full: e.altKey });
@@ -1291,7 +1262,6 @@
     const act = actionTarget();
     if (!act) return;
     const res = resolveAction(act);
-    testLog({ ev: 'action', tag: act.localName, url: res.url || null, why: res.why || null, text: linkText(act).slice(0, 60) });
     if (res.url) {
       swallow(e);
       hideHint();
@@ -1569,7 +1539,7 @@
   try {
     onChrome(chrome.runtime.onMessage, (msg) => {
       if (!msg || msg.type !== 'ql:preview-url' || !msg.url) return;
-      const el = lastContextLink && previewUrl(lastContextLink) && L.dedupeKey(previewUrl(lastContextLink)) === L.dedupeKey(L.unwrap(msg.url)) ? lastContextLink : null;
+      const el = lastContextLink && previewUrl(lastContextLink) && L.dedupeKey(previewUrl(lastContextLink)) === L.dedupeKey(googleNewsTarget(msg.url) || L.unwrap(msg.url)) ? lastContextLink : null;
       if (el) open(el); else showUrl(msg.url, {});
     });
   } catch (e) { /* ignore */ }

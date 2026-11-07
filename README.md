@@ -96,7 +96,7 @@ Open them from the toolbar button or by right-clicking the toolbar icon and choo
 
 ## For developers
 
-Plain Manifest V3, with no build step and no dependencies apart from the bundled [Readability](https://github.com/mozilla/readability). Clone the repo and load the folder with **Load unpacked**.
+Plain Manifest V3, with no build step and no dependencies apart from the bundled [Readability](https://github.com/mozilla/readability). Clone the repo and load the folder with **Load unpacked**. Run the link-utility tests with `node --test test/`.
 
 ```
 background.js        service worker: content-script registration, network rules, tab opening

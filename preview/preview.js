@@ -178,6 +178,7 @@
   let idleRelease = 0;
   async function show(msg) {
     const token = ++showToken;
+    clearTimeout(idleRelease);
     // Privacy-relevant options come from storage, never from the message.
     const st = await QLSettings.get();
     if (token !== showToken) return;
@@ -1138,6 +1139,4 @@
     navigator.clipboard.writeText(text).then(() => toast('Link copied'), () => toast('Couldn’t copy'));
   }
 
-  // Test hook (extension origin only).
-  globalThis.__qlPreview = { cache, liveFrames, state: () => ({ current, currentMode, kind: currentResult && currentResult.kind }) };
 })();

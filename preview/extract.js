@@ -306,7 +306,7 @@
     const base = setBase(doc, url);
     fixLazyMedia(doc);
     const adapter = adapterContent(doc, base);
-    let contentEl = null, byline = null, title = meta.title, excerpt = null, label = null;
+    let contentEl = null, byline = null, title = meta.title, label = null;
     let extras = [];
     if (adapter) {
       contentEl = adapter.el;
@@ -325,7 +325,6 @@
         if (article && article.content) {
           contentEl = article.content;
           byline = article.byline || null;
-          excerpt = article.excerpt || null;
           if (article.title && article.title.length > 3 && (!title || title.length > 140)) title = article.title;
           if (!meta.dates.published && article.publishedTime) {
             const d = validDate(article.publishedTime);
@@ -338,7 +337,7 @@
     const text = (contentEl.textContent || '').replace(/\s+/g, ' ').trim();
     if (text.length < (adapter ? 40 : 450)) return null;
     const { words, minutes } = wordCount(text);
-    return { title, byline: byline || meta.author, excerpt, label, extras, contentEl, base, words, minutes, textLength: text.length };
+    return { title, byline: byline || meta.author, label, extras, contentEl, base, words, minutes };
   }
 
   /* ---------- Sanitizer ---------- */

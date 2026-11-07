@@ -416,7 +416,7 @@
     if (!(await hasAccess(embedHost))) throw needAccess(embedHost);
     let embed;
     if (yt.playlist && !yt.id) embed = embedHost + 'embed/videoseries?list=' + encodeURIComponent(yt.playlist) + '&autoplay=1';
-    else embed = embedHost + 'embed/' + yt.id + '?autoplay=1&rel=0&playsinline=1&enablejsapi=1' + (yt.start ? '&start=' + yt.start : '') + (yt.list ? '&list=' + encodeURIComponent(yt.list) : '');
+    else embed = embedHost + 'embed/' + yt.id + '?autoplay=1&rel=0&playsinline=1' + (yt.start ? '&start=' + yt.start : '') + (yt.list ? '&list=' + encodeURIComponent(yt.list) : '');
     embed += '&enablejsapi=1&origin=' + encodeURIComponent(location.origin);
     // Title and errors arrive from the player itself over its postMessage API,
     // so there's no separate request to YouTube for metadata.
@@ -1124,7 +1124,7 @@
         }
       }));
     }
-    actions.push(h('button', { class: 'btn', text: 'Retry', onclick: () => { cache.delete(res.url); show(Object.assign({}, current)); } }));
+    actions.push(h('button', { class: 'btn', text: 'Retry', onclick: () => show(Object.assign({}, current)) }));
     actions.push(openBtn(res.url, true));
     stage.replaceChildren(notice({
       glyph: res.status ? GLYPH.lockdoc : GLYPH.cloudOff,
